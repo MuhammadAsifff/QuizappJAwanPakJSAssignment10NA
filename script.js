@@ -1,6 +1,6 @@
 var questions = [
     {
-        question: "HTML stands for _____________",
+        question: "Html stands for _____________",
         option: ["hyper markup", "JS", "hyper text markup language", "cascading style sheet"],
         correctAns: "hyper text markup language"
     },
@@ -26,79 +26,70 @@ var questions = [
     }
 ];
 
-
-
 var currentQuestion = 0;
 var score = 0;
 
-var questionContainer = document.getElementById("question-container");
-var optionsContainer = document.getElementById("options-container");
-var resultContainer = document.getElementById("result-container");
-var nextButton = document.getElementById("next-btn");
+function displayQuestion() {
+    var questionElement = document.getElementById("question");
+    var optionElement = document.getElementById("options");
+    var nextButton = document.getElementById("nextButton");
+    var progressElement = document.getElementById("progress");
 
+    questionElement.textContent = (currentQuestion + 1) + ". " + questions[currentQuestion].question;
+    optionElement.innerHTML = "";
 
-
-function loadQuestion() {
-    var question = questions[currentQuestion];
-    questionContainer.textContent = question.question;
-    
-
-    while (optionsContainer.firstChild) {
-        optionsContainer.removeChild(optionsContainer.firstChild);
+    var options = questions[currentQuestion].option;
+    for (var i = 0; i < options.length; i++) {
+        var button = document.createElement("button");
+        button.textContent = options[i];
+        button.addEventListener("click", checkAnswer);
+        optionElement.appendChild(button);
     }
 
-
-    question.option.forEach(function (option, index) {
-        var button = document.createElement("button");
-        button.textContent = option;
-        button.addEventListener("click", checkAnswer.bind(null, index));
-        optionsContainer.appendChild(button);
-    });
-
+    progressElement.textContent = "Question " + (currentQuestion + 1) + " of " + questions.length;
     nextButton.style.display = "none";
-    resultContainer.textContent = "";
 }
 
+function checkAnswer(event) {
+    var selectedOption = event.target;
+    var nextButton = document.getElementById("nextButton");
 
-
-function checkAnswer(selectedOption) {
-    var question = questions[currentQuestion];
-
-    if (question.option[selectedOption] === question.correctAns) {
+    if (selectedOption.textContent === questions[currentQuestion].correctAns) {
         score++;
+        selectedOption.style.backgroundColor = "green";
+    } else {
+        selectedOption.style.backgroundColor = "red";
     }
 
-    
-    Array.from(optionsContainer.children).forEach(function (button) {
-        button.disabled = true;
-        if (question.correctAns === button.textContent) {
-            button.style.backgroundColor = "green";
-        } else {
-            button.style.backgroundColor = "red";
+    for (var i = 0; i < questions[currentQuestion].option.length; i++) {
+        if (questions[currentQuestion].option[i] === questions[currentQuestion].correctAns) {
+            var correctButton = document.getElementsByTagName("button")[i];
+            correctButton.style.backgroundColor = "green";
+            break;
         }
-    });
-
-    if (currentQuestion === questions.length - 1) {
-        nextButton.textContent = "Finish";
     }
 
     nextButton.style.display = "block";
-    currentQuestion++;
+    nextButton.addEventListener("click", nextQuestion);
+}
+
+function nextQuestion() {
+    var nextButton = document.getElementById("nextButton");
+
+    if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        displayQuestion();
+    } else {
+        showResult();
+    }
+
+    nextButton.style.display = "none";
 }
 
 function showResult() {
-    questionContainer.style.display = "none";
-    optionsContainer.style.display = "none";
-    nextButton.style.display = "none";
-    resultContainer.textContent = "Your score: " + score + "/" + questions.length;
+    var container = document.getElementsByClassName("container")[0];
+    container.innerHTML = "<h2>Quiz Result</h2>";
+    container.innerHTML += "<p>You scored " + score + " out of " + questions.length + " questions.</p>";
 }
 
-nextButton.addEventListener("click", function () {
-    if (currentQuestion === questions.length) {
-        showResult();
-    } else {
-        loadQuestion();
-    }
-});
-
-loadQuestion();
+displayQuestion();
